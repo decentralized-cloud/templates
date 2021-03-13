@@ -1,0 +1,45 @@
+parameters:
+  environment: ""
+  helmArtifactName: ""
+  helmVersion: "3.5.2"
+  connectionType: "Kubernetes Service Connection"
+  kubernetesServiceConnection: ""
+  namespace: ""
+  command: "upgrade"
+  chartPath: ""
+  releaseName: ""
+  overrideValues: ""
+  recreate: true
+
+jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: DownloadPipelineArtifact@2
+              displayName: "Download pipeline artifact"
+              inputs:
+                artifact: ${{ parameters.helmArtifactName }}
+                path: ${{ parameters.helmArtifactName }}
+
+            - task: HelmInstaller@0
+              displayName: "Install Helm"
+              inputs:
+                helmVersion: ${{ parameters.helmVersion }}
+
+            - task: HelmDeploy@0
+              displayName: "Deploy service using helm"
+              inputs:
+                connectionType: ${{ parameters.connectionType }}
+                kubernetesServiceConnection: ${{ parameters.kubernetesServiceConnection }}
+                namespace: ${{ parameters.namespace }}
+                command: ${{ parameters.command }}
+                chartType: FilePath
+                chartPath: ${{ parameters.chartPath }}
+                releaseName: ${{ parameters.releaseName }}
+                overrideValues: ${{ parameters.overrideValues }}
+                recreate: ${{ parameters.recreate }}
