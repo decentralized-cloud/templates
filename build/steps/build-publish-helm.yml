@@ -1,0 +1,27 @@
+parameters:
+  helmVersion: ""
+  helmChartsDirectoryPath: ""
+  helmChartsOutputDirectoryPath: ""
+  helmArtifactName: ""
+  appVersion: ""
+
+steps:
+  - task: HelmInstaller@0
+    displayName: "Installing helm"
+    inputs:
+      helmVersion: ${{ parameters.helmVersion }}
+      installKubectl: false
+
+  - task: Bash@3
+    displayName: "Packaging helm"
+    inputs:
+      targetType: "inline"
+      script: |
+        helm package --destination ${{ parameters.helmChartsOutputDirectoryPath }} --app-version ${{ parameters.appVersion }} ${{ parameters.helmChartsDirectoryPath }}
+
+  - task: PublishPipelineArtifact@1
+    displayName: "Publish helm artifact"
+    inputs:
+      targetPath: ${{ parameters.helmChartsOutputDirectoryPath }}
+      artifact: ${{ parameters.helmArtifactName }}
+      publishLocation: "pipeline"

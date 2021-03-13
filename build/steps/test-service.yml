@@ -1,0 +1,21 @@
+parameters:
+  testDockerComposeFilePath: ""
+  ciService: ""
+  coverallsToken: ""
+
+steps:
+  - task: DockerCompose@0
+    displayName: "Build Tests"
+    inputs:
+      dockerComposeFile: ${{ parameters.testDockerComposeFilePath }}
+      action: "Build services"
+
+  - task: DockerCompose@0
+    displayName: "Run Tests"
+    inputs:
+      dockerComposeFile: ${{ parameters.testDockerComposeFilePath }}
+      dockerComposeFileArgs: |
+        CI_SERVICE=${{ parameters.ciService }}
+        COVERALLS_TOKEN=${{ parameters.coverallsToken }}
+      action: "Run services"
+      arguments: "tests"

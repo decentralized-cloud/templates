@@ -1,0 +1,16 @@
+parameters:
+  dockerRepositoryName: ""
+  dockerBuildFilePath: ""
+  buildContext: ""
+  version: ""
+
+steps:
+  - task: Docker@2
+    displayName: "Build service"
+    inputs:
+      repository: ${{parameters.dockerRepositoryName}}
+      command: "build"
+      Dockerfile: ${{parameters.dockerBuildFilePath}}
+      buildContext: ${{parameters.buildContext}}
+      arguments: "--build-arg VERSION=${{parameters.version}}"
+      tags: ${{parameters.version}}

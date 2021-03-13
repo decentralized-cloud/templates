@@ -1,0 +1,27 @@
+parameters:
+  dockerContainerRegistry: ""
+  dockerRepositoryName: ""
+  buildContext: ""
+  version: ""
+
+steps:
+  - task: Docker@2
+    displayName: "Docker login"
+    inputs:
+      containerRegistry: ${{parameters.dockerContainerRegistry}}
+      command: "login"
+
+  - task: Docker@2
+    displayName: "Push docker image"
+    inputs:
+      containerRegistry: ${{parameters.dockerContainerRegistry}}
+      repository: ${{parameters.dockerRepositoryName}}
+      command: "push"
+      buildContext: ${{parameters.buildContext}}
+      tags: ${{ parameters.version }}
+
+  - task: Docker@2
+    displayName: "Docker logout"
+    inputs:
+      containerRegistry: ${{parameters.dockerContainerRegistry}}
+      command: "logout"

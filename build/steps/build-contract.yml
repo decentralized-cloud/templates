@@ -1,0 +1,10 @@
+parameters:
+  grpcContractScriptFilePath: ""
+  grpcContractScriptworkingDirectory: ""
+
+steps:
+  - task: Bash@3
+    displayName: "Build gRPC contract"
+    inputs:
+      filePath: ${{ parameters.grpcContractScriptFilePath }}
+      arguments: ${{ parameters.grpcContractScriptworkingDirectory }}

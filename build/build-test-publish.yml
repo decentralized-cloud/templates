@@ -1,0 +1,71 @@
+parameters:
+  vmImage: ""
+  gitVersion: ""
+  gitVersionConfigFilePath: ""
+  grpcContractScriptFilePath: ""
+  grpcContractScriptworkingDirectory: ""
+  dockerContainerRegistry: ""
+  dockerRepositoryName: ""
+  dockerBuildFilePath: ""
+  dockerBuildContext: ""
+  dockerVersion: ""
+  testDockerComposeFilePath: ""
+  ciService: ""
+  coverallsToken: ""
+  helmVersion: ""
+  helmChartsDirectoryPath: ""
+  helmChartsOutputDirectoryPath: ""
+  helmArtifactName: ""
+
+jobs:
+  - job: Build_Publish
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    steps:
+      - template: steps/gitversion.yml
+      - template: steps/build-contract.yml
+        parameters:
+          grpcContractScriptFilePath: ${{ parameters.grpcContractScriptFilePath }}
+          grpcContractScriptworkingDirectory: ${{ parameters.grpcContractScriptworkingDirectory }}
+
+      - template: steps/build-service.yml
+        parameters:
+          dockerRepositoryName: ${{ parameters.dockerRepositoryName }}
+          dockerBuildFilePath: ${{ parameters.dockerBuildFilePath }}
+          buildContext: ${{ parameters.dockerBuildContext }}
+          version: ${{ parameters.dockerVersion }}
+
+      - template: steps/publish-service.yml
+        parameters:
+          dockerRepositoryName: ${{ parameters.dockerRepositoryName }}
+          dockerContainerRegistry: ${{ parameters.dockerContainerRegistry }}
+          buildContext: ${{ parameters.dockerBuildContext }}
+          version: ${{ parameters.dockerVersion }}
+
+  - job: Test_Publish_Results
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    steps:
+      - template: steps/build-contract.yml
+        parameters:
+          grpcContractScriptFilePath: ${{ parameters.grpcContractScriptFilePath }}
+          grpcContractScriptworkingDirectory: ${{ parameters.grpcContractScriptworkingDirectory }}
+
+      - template: steps/test-service.yml
+        parameters:
+          testDockerComposeFilePath: ${{ parameters.testDockerComposeFilePath }}
+          ciService: ${{ parameters.ciService }}
+          coverallsToken: ${{ parameters.coverallsToken }}
+
+  - job: Build_Publish_Helm
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    steps:
+      - template: steps/gitversion.yml
+      - template: steps/build-publish-helm.yml
+        parameters:
+          helmVersion: ${{ parameters.helmVersion }}
+          helmChartsDirectoryPath: ${{ parameters.helmChartsDirectoryPath }}
+          helmChartsOutputDirectoryPath: ${{ parameters.helmChartsOutputDirectoryPath }}
+          helmArtifactName: ${{ parameters.helmArtifactName }}
+          appVersion: ${{ parameters.dockerVersion }}
