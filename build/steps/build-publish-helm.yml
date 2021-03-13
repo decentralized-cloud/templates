@@ -20,7 +20,7 @@ steps:
         helm package --destination ${{ parameters.helmChartsOutputDirectoryPath }} --app-version ${{ parameters.appVersion }} ${{ parameters.helmChartsDirectoryPath }}
 
   - task: PublishPipelineArtifact@1
-    displayName: "Publish helm artifact"
+    displayName: "Publish helm artifact locally"
     inputs:
       targetPath: ${{ parameters.helmChartsOutputDirectoryPath }}
       artifact: ${{ parameters.helmArtifactName }}

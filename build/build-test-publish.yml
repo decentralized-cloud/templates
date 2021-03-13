@@ -1,4 +1,5 @@
 parameters:
+  publishServiceDockerImage: true
   vmImage: ""
   gitVersion: ""
   gitVersionConfigFilePath: ""
@@ -35,12 +36,13 @@ jobs:
           buildContext: ${{ parameters.dockerBuildContext }}
           version: ${{ parameters.dockerVersion }}
 
-      - template: steps/publish-service.yml
-        parameters:
-          dockerRepositoryName: ${{ parameters.dockerRepositoryName }}
-          dockerContainerRegistry: ${{ parameters.dockerContainerRegistry }}
-          buildContext: ${{ parameters.dockerBuildContext }}
-          version: ${{ parameters.dockerVersion }}
+      - ${{ if eq(parameters.publishServiceDockerImage, true) }}:
+          - template: steps/publish-service.yml
+            parameters:
+              dockerRepositoryName: ${{ parameters.dockerRepositoryName }}
+              dockerContainerRegistry: ${{ parameters.dockerContainerRegistry }}
+              buildContext: ${{ parameters.dockerBuildContext }}
+              version: ${{ parameters.dockerVersion }}
 
   - job: Test_Publish_Results
     pool:
