@@ -1,6 +1,8 @@
 parameters:
   version: ""
-  publishServiceDockerImage: true
+  shouldBuildContract: false
+  shouldPublishServiceDockerImage: true
+  shouldTestPublishResult: true
   vmImage: ""
   gitVersion: ""
   gitVersionConfigFilePath: ""
@@ -17,6 +19,7 @@ parameters:
   helmChartsDirectoryPath: ""
   helmChartsOutputDirectoryPath: ""
   helmArtifactName: ""
+  shouldPublishHelmChartAsArtifact: false
   shouldPublishHelmChart: false
   buildAndPushHelmChartDockerFilePath: ""
   buildAndPushHelmChartDockerBuildContext: ""
@@ -28,10 +31,11 @@ jobs:
       vmImage: ${{ parameters.vmImage }}
     steps:
       - template: steps/gitversion.yml
-      - template: steps/build-contract.yml
-        parameters:
-          contractScriptFilePath: ${{ parameters.contractScriptFilePath }}
-          contractScriptworkingDirectory: ${{ parameters.contractScriptworkingDirectory }}
+      - ${{ if eq(parameters.shouldBuildContract, true) }}:
+          - template: steps/build-contract.yml
+            parameters:
+              contractScriptFilePath: ${{ parameters.contractScriptFilePath }}
+              contractScriptworkingDirectory: ${{ parameters.contractScriptworkingDirectory }}
 
       - template: steps/build-service.yml
         parameters:
@@ -40,7 +44,7 @@ jobs:
           buildContext: ${{ parameters.dockerBuildContext }}
           version: ${{ parameters.version }}
 
-      - ${{ if eq(parameters.publishServiceDockerImage, true) }}:
+      - ${{ if eq(parameters.shouldPublishServiceDockerImage, true) }}:
           - template: steps/publish-service.yml
             parameters:
               dockerRepositoryName: ${{ parameters.dockerRepositoryName }}
@@ -48,33 +52,35 @@ jobs:
               buildContext: ${{ parameters.dockerBuildContext }}
               version: ${{ parameters.version }}
 
-  - job: Test_Publish_Results
-    pool:
-      vmImage: ${{ parameters.vmImage }}
-    steps:
-      - template: steps/build-contract.yml
-        parameters:
-          contractScriptFilePath: ${{ parameters.contractScriptFilePath }}
-          contractScriptworkingDirectory: ${{ parameters.contractScriptworkingDirectory }}
+  - ${{ if eq(parameters.shouldTestPublishResult, true) }}:
+      - job: Test_Publish_Results
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        steps:
+          - template: steps/build-contract.yml
+            parameters:
+              contractScriptFilePath: ${{ parameters.contractScriptFilePath }}
+              contractScriptworkingDirectory: ${{ parameters.contractScriptworkingDirectory }}
 
-      - template: steps/test-service.yml
-        parameters:
-          testDockerComposeFilePath: ${{ parameters.testDockerComposeFilePath }}
-          ciService: ${{ parameters.ciService }}
-          coverallsToken: ${{ parameters.coverallsToken }}
+          - template: steps/test-service.yml
+            parameters:
+              testDockerComposeFilePath: ${{ parameters.testDockerComposeFilePath }}
+              ciService: ${{ parameters.ciService }}
+              coverallsToken: ${{ parameters.coverallsToken }}
 
-  - job: Build_Publish_Helm_As_Artifact
-    pool:
-      vmImage: ${{ parameters.vmImage }}
-    steps:
-      - template: steps/gitversion.yml
-      - template: steps/build-publish-helm-as-artifact.yml
-        parameters:
-          helmVersion: ${{ parameters.helmVersion }}
-          helmChartsDirectoryPath: ${{ parameters.helmChartsDirectoryPath }}
-          helmChartsOutputDirectoryPath: ${{ parameters.helmChartsOutputDirectoryPath }}
-          helmArtifactName: ${{ parameters.helmArtifactName }}
-          appVersion: ${{ parameters.version }}
+  - ${{ if eq(parameters.shouldPublishHelmChartAsArtifact, true) }}:
+      - job: Build_Publish_Helm_As_Artifact
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        steps:
+          - template: steps/gitversion.yml
+          - template: steps/build-publish-helm-as-artifact.yml
+            parameters:
+              helmVersion: ${{ parameters.helmVersion }}
+              helmChartsDirectoryPath: ${{ parameters.helmChartsDirectoryPath }}
+              helmChartsOutputDirectoryPath: ${{ parameters.helmChartsOutputDirectoryPath }}
+              helmArtifactName: ${{ parameters.helmArtifactName }}
+              appVersion: ${{ parameters.version }}
 
   - ${{ if eq(parameters.shouldPublishHelmChart, true) }}:
       - job: Build_Publish_Helm
