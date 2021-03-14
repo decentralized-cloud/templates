@@ -4,8 +4,8 @@ parameters:
   vmImage: ""
   gitVersion: ""
   gitVersionConfigFilePath: ""
-  grpcContractScriptFilePath: ""
-  grpcContractScriptworkingDirectory: ""
+  contractScriptFilePath: ""
+  contractScriptworkingDirectory: ""
   dockerContainerRegistry: ""
   dockerRepositoryName: ""
   dockerBuildFilePath: ""
@@ -30,8 +30,8 @@ jobs:
       - template: steps/gitversion.yml
       - template: steps/build-contract.yml
         parameters:
-          grpcContractScriptFilePath: ${{ parameters.grpcContractScriptFilePath }}
-          grpcContractScriptworkingDirectory: ${{ parameters.grpcContractScriptworkingDirectory }}
+          contractScriptFilePath: ${{ parameters.contractScriptFilePath }}
+          contractScriptworkingDirectory: ${{ parameters.contractScriptworkingDirectory }}
 
       - template: steps/build-service.yml
         parameters:
@@ -54,8 +54,8 @@ jobs:
     steps:
       - template: steps/build-contract.yml
         parameters:
-          grpcContractScriptFilePath: ${{ parameters.grpcContractScriptFilePath }}
-          grpcContractScriptworkingDirectory: ${{ parameters.grpcContractScriptworkingDirectory }}
+          contractScriptFilePath: ${{ parameters.contractScriptFilePath }}
+          contractScriptworkingDirectory: ${{ parameters.contractScriptworkingDirectory }}
 
       - template: steps/test-service.yml
         parameters:
