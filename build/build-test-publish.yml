@@ -1,4 +1,5 @@
 parameters:
+  version: ""
   publishServiceDockerImage: true
   vmImage: ""
   gitVersion: ""
@@ -9,7 +10,6 @@ parameters:
   dockerRepositoryName: ""
   dockerBuildFilePath: ""
   dockerBuildContext: ""
-  dockerVersion: ""
   testDockerComposeFilePath: ""
   ciService: ""
   coverallsToken: ""
@@ -17,6 +17,10 @@ parameters:
   helmChartsDirectoryPath: ""
   helmChartsOutputDirectoryPath: ""
   helmArtifactName: ""
+  shouldPublishHelmChart: false
+  buildAndPushHelmChartDockerFilePath: ""
+  buildAndPushHelmChartDockerBuildContext: ""
+  githubAccessCredentials: ""
 
 jobs:
   - job: Build_Publish
@@ -34,7 +38,7 @@ jobs:
           dockerRepositoryName: ${{ parameters.dockerRepositoryName }}
           dockerBuildFilePath: ${{ parameters.dockerBuildFilePath }}
           buildContext: ${{ parameters.dockerBuildContext }}
-          version: ${{ parameters.dockerVersion }}
+          version: ${{ parameters.version }}
 
       - ${{ if eq(parameters.publishServiceDockerImage, true) }}:
           - template: steps/publish-service.yml
@@ -42,7 +46,7 @@ jobs:
               dockerRepositoryName: ${{ parameters.dockerRepositoryName }}
               dockerContainerRegistry: ${{ parameters.dockerContainerRegistry }}
               buildContext: ${{ parameters.dockerBuildContext }}
-              version: ${{ parameters.dockerVersion }}
+              version: ${{ parameters.version }}
 
   - job: Test_Publish_Results
     pool:
@@ -59,15 +63,28 @@ jobs:
           ciService: ${{ parameters.ciService }}
           coverallsToken: ${{ parameters.coverallsToken }}
 
-  - job: Build_Publish_Helm
+  - job: Build_Publish_Helm_As_Artifact
     pool:
       vmImage: ${{ parameters.vmImage }}
     steps:
       - template: steps/gitversion.yml
-      - template: steps/build-publish-helm.yml
+      - template: steps/build-publish-helm-as-artifact.yml
         parameters:
           helmVersion: ${{ parameters.helmVersion }}
           helmChartsDirectoryPath: ${{ parameters.helmChartsDirectoryPath }}
           helmChartsOutputDirectoryPath: ${{ parameters.helmChartsOutputDirectoryPath }}
           helmArtifactName: ${{ parameters.helmArtifactName }}
-          appVersion: ${{ parameters.dockerVersion }}
+          appVersion: ${{ parameters.version }}
+
+  - ${{ if eq(parameters.shouldPublishHelmChart, true) }}:
+      - job: Build_Publish_Helm
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        steps:
+          - template: steps/gitversion.yml
+          - template: steps/build-publish-helm.yml
+            parameters:
+              buildAndPushHelmChartDockerFilePath: ${{ parameters.buildAndPushHelmChartDockerFilePath }}
+              buildContext: ${{ parameters.buildAndPushHelmChartDockerBuildContext }}
+              githubAccessCredentials: ${{ parameters.githubAccessCredentials }}
+              version: ${{ parameters.version }}
