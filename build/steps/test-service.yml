@@ -14,8 +14,6 @@ steps:
     displayName: "Run Tests"
     inputs:
       dockerComposeFile: ${{ parameters.testDockerComposeFilePath }}
-      dockerComposeFileArgs: |
-        COVERALLS_SERVICE_NAME=${{ parameters.coverallsServiceName }}
-        COVERALLS_REPO_TOKEN=${{ parameters.coverallsRepoToken }}
-      action: "Run services"
+      action: "Run a Docker Compose command"
+      dockerComposeCommand: "run --rm -e COVERALLS_SERVICE_NAME=${{ parameters.coverallsServiceName }} -e COVERALLS_REPO_TOKEN=${{ parameters.coverallsRepoToken }}"
       arguments: "tests"
