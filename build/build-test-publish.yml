@@ -13,8 +13,8 @@ parameters:
   dockerBuildFilePath: ""
   dockerBuildContext: ""
   testDockerComposeFilePath: ""
-  ciService: ""
-  coverallsToken: ""
+  coverallsServiceName: ""
+  coverallsRepoToken: ""
   helmVersion: ""
   helmChartsDirectoryPath: ""
   helmChartsOutputDirectoryPath: ""
@@ -65,8 +65,8 @@ jobs:
           - template: steps/test-service.yml
             parameters:
               testDockerComposeFilePath: ${{ parameters.testDockerComposeFilePath }}
-              ciService: ${{ parameters.ciService }}
-              coverallsToken: ${{ parameters.coverallsToken }}
+              coverallsServiceName: ${{ parameters.coverallsServiceName }}
+              coverallsRepoToken: ${{ parameters.coverallsRepoToken }}
 
   - ${{ if eq(parameters.shouldPublishHelmChartAsArtifact, true) }}:
       - job: Build_Publish_Helm_As_Artifact
