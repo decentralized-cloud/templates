@@ -15,7 +15,6 @@ parameters:
   testDockerComposeFilePath: ""
   coverallsServiceName: ""
   coverallsRepoToken: ""
-  helmVersion: ""
   helmChartsDirectoryPath: ""
   helmChartsOutputDirectoryPath: ""
   helmArtifactName: ""
@@ -76,7 +75,6 @@ jobs:
           - template: steps/gitversion.yml
           - template: steps/build-publish-helm-as-artifact.yml
             parameters:
-              helmVersion: ${{ parameters.helmVersion }}
               helmChartsDirectoryPath: ${{ parameters.helmChartsDirectoryPath }}
               helmChartsOutputDirectoryPath: ${{ parameters.helmChartsOutputDirectoryPath }}
               helmArtifactName: ${{ parameters.helmArtifactName }}
