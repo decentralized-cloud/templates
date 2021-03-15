@@ -1,7 +1,6 @@
 parameters:
   helmVersion: "3.5.3"
   helmChartsDirectoryPath: ""
-  helmChartsOutputDirectoryPath: ""
   helmArtifactName: ""
   appVersion: ""
 
@@ -17,11 +16,11 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        helm package --destination ${{ parameters.helmChartsOutputDirectoryPath }} --app-version ${{ parameters.appVersion }} ${{ parameters.helmChartsDirectoryPath }}
+        helm package --destination "$(system.defaultWorkingDirectory)/chart-output" --app-version ${{ parameters.appVersion }} ${{ parameters.helmChartsDirectoryPath }}
 
   - task: PublishPipelineArtifact@1
     displayName: "Publish helm artifact locally"
     inputs:
-      targetPath: ${{ parameters.helmChartsOutputDirectoryPath }}
+      targetPath: "$(system.defaultWorkingDirectory)/chart-output"
       artifact: ${{ parameters.helmArtifactName }}
       publishLocation: "pipeline"

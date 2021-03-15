@@ -5,6 +5,7 @@ parameters:
   shouldTestPublishResult: false
   shouldPublishHelmChartAsArtifact: false
   shouldPublishHelmChart: false
+  shouldPublishFirebaseAsArtifact: false
   vmImage: ""
   gitVersion: ""
   gitVersionConfigFilePath: ""
@@ -18,7 +19,6 @@ parameters:
   coverallsServiceName: ""
   coverallsRepoToken: ""
   helmChartsDirectoryPath: ""
-  helmChartsOutputDirectoryPath: ""
   helmArtifactName: ""
   buildAndPushHelmChartDockerFilePath: ""
   buildAndPushHelmChartDockerBuildContext: ""
@@ -77,7 +77,6 @@ jobs:
           - template: steps/build-publish-helm-as-artifact.yml
             parameters:
               helmChartsDirectoryPath: ${{ parameters.helmChartsDirectoryPath }}
-              helmChartsOutputDirectoryPath: ${{ parameters.helmChartsOutputDirectoryPath }}
               helmArtifactName: ${{ parameters.helmArtifactName }}
               appVersion: ${{ parameters.version }}
 
@@ -92,4 +91,15 @@ jobs:
               buildAndPushHelmChartDockerFilePath: ${{ parameters.buildAndPushHelmChartDockerFilePath }}
               buildContext: ${{ parameters.buildAndPushHelmChartDockerBuildContext }}
               githubAccessCredentials: ${{ parameters.githubAccessCredentials }}
+              version: ${{ parameters.version }}
+
+  - ${{ if eq(parameters.shouldPublishFirebaseAsArtifact, true) }}:
+      - job: Publish_Firebase_As_Artifact
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        steps:
+          - template: steps/gitversion.yml
+          - template: steps/publish-firebase-as-artifact.yml
+            parameters:
+              artifactName: ${{ parameters.firbaseArtifactName }}
               version: ${{ parameters.version }}
