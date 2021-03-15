@@ -1,7 +1,7 @@
 parameters:
   environment: ""
   helmArtifactName: ""
-  helmVersion: "3.5.2"
+  helmVersion: "3.5.3"
   connectionType: "Kubernetes Service Connection"
   kubernetesServiceConnection: ""
   namespace: ""
