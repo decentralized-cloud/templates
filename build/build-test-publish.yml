@@ -1,8 +1,10 @@
 parameters:
   version: ""
   shouldBuildContract: false
-  shouldPublishServiceDockerImage: true
-  shouldTestPublishResult: true
+  shouldPublishServiceDockerImage: false
+  shouldTestPublishResult: false
+  shouldPublishHelmChartAsArtifact: false
+  shouldPublishHelmChart: false
   vmImage: ""
   gitVersion: ""
   gitVersionConfigFilePath: ""
@@ -18,8 +20,6 @@ parameters:
   helmChartsDirectoryPath: ""
   helmChartsOutputDirectoryPath: ""
   helmArtifactName: ""
-  shouldPublishHelmChartAsArtifact: false
-  shouldPublishHelmChart: false
   buildAndPushHelmChartDockerFilePath: ""
   buildAndPushHelmChartDockerBuildContext: ""
   githubAccessCredentials: ""
@@ -56,10 +56,11 @@ jobs:
         pool:
           vmImage: ${{ parameters.vmImage }}
         steps:
-          - template: steps/build-contract.yml
-            parameters:
-              contractScriptFilePath: ${{ parameters.contractScriptFilePath }}
-              contractScriptworkingDirectory: ${{ parameters.contractScriptworkingDirectory }}
+          - ${{ if eq(parameters.shouldBuildContract, true) }}:
+              - template: steps/build-contract.yml
+                parameters:
+                  contractScriptFilePath: ${{ parameters.contractScriptFilePath }}
+                  contractScriptworkingDirectory: ${{ parameters.contractScriptworkingDirectory }}
 
           - template: steps/test-service.yml
             parameters:
