@@ -102,4 +102,5 @@ jobs:
           - template: steps/publish-firebase-as-artifact.yml
             parameters:
               artifactName: ${{ parameters.firbaseArtifactName }}
+              dockerRepositoryName: ${{ parameters.dockerRepositoryName }}
               version: ${{ parameters.version }}
