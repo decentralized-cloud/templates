@@ -1,0 +1,38 @@
+parameters:
+  environment: ""
+  artifactName: ""
+  token: ""
+  projectId: ""
+  resourceName: ""
+  extraArguments: ""
+
+jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: DownloadPipelineArtifact@2
+              displayName: "Download pipeline artifact"
+              inputs:
+                artifact: ${{ parameters.artifactName }}
+                path: ${{ parameters.artifactName }}
+
+            - task: Bash@3
+              displayName: "Prepare to publish"
+              inputs:
+                targetType: "inline"
+                script: |
+                  export ARGUMENTS_VALUE="--build-arg VERSION=$(jq -r '.version' < ${{ parameters.artifactName }}/details.json) --build-arg BASE_IMAGE=$(jq -r '.docker_image_tag' < ${{ parameters.artifactName }}/details.json) --build-arg FIREBASE_TOKEN=${{ parameters.token }} --build-arg FIREBASE_PROJECT_ID=${{ parameters.projectId }} --build-arg FIREBASE_RESOURCE_NAME=${{ parameters.resourceName }} ${{ parameters.extraArguments }}"
+                  echo "##vso[task.setvariable variable=ARGUMENTS]$ARGUMENTS_VALUE"
+
+            - task: Docker@2
+              displayName: "Deploy to firebase"
+              inputs:
+                command: "build"
+                Dockerfile: "${{ parameters.artifactName }}/Dockerfile.firebase"
+                buildContext: ${{ parameters.artifactName }}
+                arguments: $(ARGUMENTS)

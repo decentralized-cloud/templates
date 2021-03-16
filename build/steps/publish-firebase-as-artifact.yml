@@ -10,7 +10,7 @@ steps:
       targetType: "inline"
       script: |
         mkdir -p "$(system.defaultWorkingDirectory)/artifact_details"
-        echo $(jq -n --arg version "${{ parameters.version }}" --arg docker_image_tag "${{ parameters.dockerRepositoryName }}:${{ parameters.version }}" '{version: $version, docker_image_tag: $docker_image_tag}') > "$(system.defaultWorkingDirectory)/artifact_details/build_details.json"
+        echo $(jq -n --arg version "${{ parameters.version }}" --arg docker_image_tag "${{ parameters.dockerRepositoryName }}:${{ parameters.version }}" '{version: $version, docker_image_tag: $docker_image_tag}') > "$(system.defaultWorkingDirectory)/artifact_details/details.json"
         cp "$(system.defaultWorkingDirectory)/firebase.json" "$(system.defaultWorkingDirectory)/artifact_details/"
         cp "$(system.defaultWorkingDirectory)/docker/Dockerfile.firebase" "$(system.defaultWorkingDirectory)/artifact_details/"
         cp "$(system.defaultWorkingDirectory)/scripts/publish_to_firebase.sh" "$(system.defaultWorkingDirectory)/artifact_details/"
